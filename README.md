@@ -2,7 +2,7 @@
 
 A Retrieval-Augmented Generation (RAG) system built with LangGraph that answers questions about company policy documents (Refund, Cancellation, Shipping/Delivery, Pricing) using an agentic workflow with intent classification, semantic retrieval, keyword reranking, and LLM-based generation with Groq LLaMA and Google Gemini fallback.
 
----
+## [Web app Chatbot Link](https://huggingface.co/spaces/tagc23/NeuraRAG-BOT)
 
 ## Quick Start
 
