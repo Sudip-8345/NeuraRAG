@@ -82,6 +82,10 @@ class EvaluationDataset:
 class Evaluator:
     """Evaluates RAG system responses."""
     
+    # Constants for evaluation thresholds
+    MIN_ANSWER_LENGTH = 20  # Minimum characters for a substantial answer
+    MAX_VERBOSE_LENGTH = 500  # Maximum before considering too verbose
+    
     def __init__(self):
         """Initialize the evaluator."""
         self.evaluation_results = []
@@ -120,7 +124,7 @@ class Evaluator:
             if has_fallback:
                 accuracy_score = "⚠️"  # Should answer but didn't
                 note = "Failed to answer an answerable question"
-            elif len(answer.strip()) > 20:  # Has substantial answer
+            elif len(answer.strip()) > self.MIN_ANSWER_LENGTH:  # Has substantial answer
                 accuracy_score = "✅"
                 note = "Correctly answered"
             else:
@@ -131,7 +135,7 @@ class Evaluator:
             if has_fallback:
                 accuracy_score = "✅"  # Correctly identified incomplete info
                 note = "Correctly acknowledged partial information"
-            elif len(answer.strip()) > 20:
+            elif len(answer.strip()) > self.MIN_ANSWER_LENGTH:
                 accuracy_score = "⚠️"  # Answered but might be incomplete
                 note = "Provided partial answer"
             else:
@@ -150,7 +154,7 @@ class Evaluator:
         # Check answer clarity
         if len(answer.strip()) < 10:
             clarity_score = "❌"
-        elif len(answer) > 500:
+        elif len(answer) > self.MAX_VERBOSE_LENGTH:
             clarity_score = "⚠️"  # Too verbose
         
         return {

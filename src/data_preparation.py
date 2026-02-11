@@ -12,6 +12,10 @@ import re
 class DocumentProcessor:
     """Handles document loading and text processing."""
     
+    # Constants for sentence boundary detection
+    SENTENCE_BOUNDARY_LOOKBACK = 100  # chars to look back for sentence end
+    SENTENCE_BOUNDARY_LOOKAHEAD = 50  # chars to look ahead for sentence end
+    
     def __init__(self, chunk_size: int = 512, chunk_overlap: int = 50):
         """
         Initialize the document processor.
@@ -85,8 +89,8 @@ class DocumentProcessor:
             
             # If not at the end of text, try to break at sentence boundary
             if end < len(text):
-                # Look for sentence ending punctuation within last 100 chars
-                substr = text[max(start, end - 100):end + 50]
+                # Look for sentence ending punctuation
+                substr = text[max(start, end - self.SENTENCE_BOUNDARY_LOOKBACK):end + self.SENTENCE_BOUNDARY_LOOKAHEAD]
                 sentence_end = max(
                     substr.rfind('. '),
                     substr.rfind('.\n'),
@@ -96,7 +100,7 @@ class DocumentProcessor:
                 
                 if sentence_end != -1:
                     # Adjust end to sentence boundary
-                    end = max(start, end - 100) + sentence_end + 1
+                    end = max(start, end - self.SENTENCE_BOUNDARY_LOOKBACK) + sentence_end + 1
             
             # Extract chunk
             chunk_text = text[start:end].strip()

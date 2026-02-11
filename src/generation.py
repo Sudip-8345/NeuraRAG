@@ -90,10 +90,15 @@ class LLMGenerator:
         
         Args:
             model: Groq model to use (llama-3.1-70b-versatile for quality)
-            temperature: Lower temperature (0.1) for more deterministic, factual responses
+            temperature: Lower temperature (0.1) for more deterministic, factual responses.
+                        Should be between 0.0 and 2.0. Lower values = more deterministic.
             max_tokens: Maximum tokens in response
         """
         load_dotenv()
+        
+        # Validate temperature
+        if not 0.0 <= temperature <= 2.0:
+            raise ValueError(f"Temperature must be between 0.0 and 2.0, got {temperature}")
         
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
