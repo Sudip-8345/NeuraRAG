@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ChromaDB vector database
+chroma_db/
+
+# Environment variables
+.env
+
+# Evaluation results
+evaluation_results.json
