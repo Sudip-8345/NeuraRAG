@@ -1,6 +1,5 @@
+"""NeuraRAG — CLI Entry Point"""
 """
-NeuraRAG — CLI Entry Point
-
 Usage:
     python main.py --build          Build the vector store
     python main.py                  Interactive Q&A (default: prompt v2)
@@ -16,11 +15,13 @@ import config
 from rag.loader import load_documents
 from rag.chunker import chunk_documents
 from rag.vectorstore import build_vectorstore, load_vectorstore
-from rag.chain import ask
+from agent.nodes import init_tool
+from agent.workflow import ask
+from langchain_core.messages import HumanMessage, AIMessage
+from collections import deque
 
 
 def build_index():
-    """Load docs → chunk → embed → store in ChromaDB."""
     print("\n=== Building Vector Store ===\n")
     docs = load_documents()
     chunks = chunk_documents(docs)
@@ -30,20 +31,24 @@ def build_index():
 
 
 def get_vectorstore():
-    """Load existing vector store, or build one if it doesn't exist."""
     if os.path.exists(config.CHROMA_PERSIST_DIR):
         return load_vectorstore()
     print("No vector store found. Building one first...\n")
     return build_index()
 
 
+# --- Interactive Question & Answer Loop ---
 def interactive_qa(prompt_version, use_reranking):
-    """Run the interactive Q&A loop."""
     store = get_vectorstore()
+    init_tool(store, use_reranking)  # Initialize retrieval tool with vectorstore
+
+    # keep last N turns as conversation history
+    history = deque(maxlen=config.MEMORY_MAX_TURNS)
 
     print("\n=== NeuraRAG Policy Assistant ===")
     print(f"Prompt: {prompt_version} | Reranking: {'on' if use_reranking else 'off'}")
-    print("Type 'quit' to exit.\n")
+    print(f"Memory: last {config.MEMORY_MAX_TURNS} turns")
+    print("Type 'quit' to exit, 'clear' to reset memory.\n")
 
     while True:
         try:
@@ -54,21 +59,28 @@ def interactive_qa(prompt_version, use_reranking):
 
         if not question:
             continue
-        if question.lower() in ("quit", "exit", "q"):
+        if question.lower() in ("quit", "exit"):
             print("Bye!")
             break
+        if question.lower() == "clear":
+            history.clear()
+            print("Memory cleared.\n")
+            continue
 
-        result = ask(store, question, prompt_version, use_reranking)
+        result = ask(question, prompt_version, chat_history=list(history))
+
+        history.append(HumanMessage(content=question))
+        history.append(AIMessage(content=result["answer"]))
 
         print(f"\n{'─' * 60}")
         print(result["answer"])
         print(f"{'─' * 60}")
-        print(f"Sources: {', '.join(result['sources'])}")
+        if result["sources"]:
+            print(f"Sources: {', '.join(result['sources'])}")
         print(f"Model: {result['model_used']} | Prompt: {result['prompt_version']}\n")
 
 
 def validate_keys():
-    """Check that API keys are set in .env."""
     missing = []
     if not config.GROQ_API_KEY or "your_" in (config.GROQ_API_KEY or ""):
         missing.append("GROQ_API_KEY")

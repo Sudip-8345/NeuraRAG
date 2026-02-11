@@ -1,5 +1,6 @@
 """ChromaDB vector store — build from chunks or load from disk."""
 
+import os
 from langchain_chroma import Chroma
 from rag.embeddings import get_embedding_function
 import config
@@ -8,7 +9,6 @@ COLLECTION_NAME = "neura_policies"
 
 
 def build_vectorstore(chunks):
-    """Create and persist a new vector store from document chunks."""
     store = Chroma.from_documents(
         documents=chunks,
         embedding=get_embedding_function(),
@@ -20,7 +20,6 @@ def build_vectorstore(chunks):
 
 
 def load_vectorstore():
-    """Load existing vector store from disk."""
     store = Chroma(
         collection_name=COLLECTION_NAME,
         embedding_function=get_embedding_function(),

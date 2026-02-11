@@ -1,6 +1,6 @@
 # NeuraRAG — Policy Q&A Assistant
 
-A Retrieval-Augmented Generation (RAG) system that answers questions about company policy documents (Refund, Cancellation, Shipping/Delivery) using semantic retrieval and Groq-hosted LLaMA.
+A Retrieval-Augmented Generation (RAG) system built with LangGraph that answers questions about company policy documents (Refund, Cancellation, Shipping/Delivery, Pricing) using an agentic workflow with intent classification, semantic retrieval, keyword reranking, and LLM-based generation with Groq LLaMA and Google Gemini fallback.
 
 ---
 
@@ -8,8 +8,10 @@ A Retrieval-Augmented Generation (RAG) system that answers questions about compa
 
 ### 1. Prerequisites
 - Python 3.10+
-- [Groq API Key](https://console.groq.com/keys) (free tier available)
-- [Google AI API Key](https://aistudio.google.com/apikey) (for embeddings)
+- [Groq API Key](https://console.groq.com/keys)
+- [Google AI API Key](https://aistudio.google.com/apikey)
+- [OpenRouter API Key](https://openrouter.ai/keys) — used as LLM judge for DeepEval evaluation
+- [Confident AI API Key](https://app.confident-ai.com/) *(optional)* — for evaluation dashboard
 
 ### 2. Setup
 
@@ -29,7 +31,8 @@ pip install -r requirements.txt
 # Configure API keys
 copy .env.example .env       # Windows
 # cp .env.example .env       # macOS/Linux
-# Then edit .env and add your GROQ_API_KEY and GOOGLE_API_KEY
+# Then edit .env and add your API keys:
+#   GROQ_API_KEY, GOOGLE_API_KEY, OPENROUTER_API_KEY, CONFIDENT_API_KEY
 ```
 
 ### 3. Build the Vector Store
@@ -51,17 +54,20 @@ python main.py --prompt v1
 python main.py --no-rerank
 ```
 
-### 5. Run Evaluation
+### 5. Run Evaluation (DeepEval + OpenRouter)
 
 ```bash
 # Evaluate with prompt v2 (default)
-python -m evaluation.evaluate
+python evaluation/deepeval_eval.py --prompt v2
 
 # Evaluate with prompt v1
-python -m evaluation.evaluate --prompt v1
+python evaluation/deepeval_eval.py --prompt v1
+
+# Disable reranking
+python evaluation/deepeval_eval.py --prompt v2 --no-rerank
 
 # Compare v1 vs v2
-python -m evaluation.evaluate --compare
+python evaluation/deepeval_eval.py --compare
 ```
 
 ---
@@ -72,14 +78,21 @@ python -m evaluation.evaluate --compare
 NeuraRAG/
 ├── config.py                # Centralized settings (API keys, chunk size, model)
 ├── main.py                  # CLI entry point (build index / interactive Q&A)
+├── ranking.py               # Standalone BM25 reranking experiment script
 ├── .env                     # API keys (not committed)
 ├── .env.example             # Template for .env
 ├── requirements.txt         # Python dependencies
 │
 ├── data/                    # Source policy documents (Markdown)
 │   ├── cancellation_policy.md
+│   ├── pricing.md
 │   ├── refund_policy.md
 │   └── shipping_policy.md
+│
+├── agent/                   # LangGraph agentic workflow
+│   ├── state.py             # AgentState TypedDict (messages, intents, context, etc.)
+│   ├── nodes.py             # Node functions: intent_classifier, retrieve, greet, out_of_scope
+│   └── workflow.py          # Graph construction, compilation, and `ask()` entry point
 │
 ├── rag/                     # RAG pipeline modules
 │   ├── loader.py            # Load .md files using LangChain DirectoryLoader
@@ -87,25 +100,42 @@ NeuraRAG/
 │   ├── embeddings.py        # Google Generative AI embeddings
 │   ├── vectorstore.py       # ChromaDB build & load
 │   ├── retriever.py         # Semantic search + keyword reranking
-│   ├── prompts.py           # Prompt templates v1 & v2 with iteration notes
-│   ├── chain.py             # Full RAG chain: retrieve → rerank → prompt → LLM
-│   └── logger.py            # Basic query tracing to logs/rag_trace.log
+│   ├── prompts.py           # Prompt templates v1, v2, and greeting
+│   └── generate.py          # LLM generation node (Groq primary, Google fallback)
+│
+├── utils/                   # Shared utilities
+│   ├── llms.py              # LLM factory functions (Groq + Google GenAI)
+│   └── logger.py            # Query tracing to logs/rag_trace.log
 │
 ├── evaluation/              # Evaluation pipeline
-│   ├── questions.py         # 8 test questions (answerable / partial / unanswerable)
-│   └── evaluate.py          # Automated scoring with keyword + hallucination checks
-│
-├── evaluation_results/      # JSON outputs from evaluation runs
+│   ├── questions.py         # 5 test questions (answerable / partial / unanswerable)
+│   └── deepeval_eval.py     # DeepEval scoring with OpenRouter LLM judge
 ├── chroma_db/               # Persisted vector store (auto-generated)
 └── logs/                    # Query trace logs (auto-generated)
 ```
 
-### Pipeline Flow
+### Agent Workflow (LangGraph)
+
+```
+User Query → Intent Classifier (Groq LLM)
+                 │
+                 ├── GREETING → Greeter Node → Response
+                 ├── INQUIRY  → Retriever → Reranker → LLM Generate → Response
+                 └── OUT_OF_SCOPE → Decline Handler → Response
+```
+
+The agent uses a **conditional routing** pattern:
+1. **Intent Classifier** — LLM classifies the query as GREETING, INQUIRY, or OUT_OF_SCOPE
+2. **Retriever** — Semantic similarity search (ChromaDB) + keyword reranking
+3. **Generator** — Groq LLaMA (primary) with Google Gemini (fallback)
+4. **Memory** — Conversation history via deque (last N turns)
+
+### RAG Pipeline Flow
 
 ```
 Documents (.md) → Loader → Chunker (500 chars) → Embeddings (Google GenAI)
     → ChromaDB (vector store) → Semantic Retrieval (top-3)
-    → Keyword Reranking → Prompt Template → Groq LLaMA 3.1 → Answer
+    → Keyword Reranking → Prompt Template → Groq LLaMA 3.3 70B → Answer
 ```
 
 ---
@@ -124,12 +154,13 @@ Documents (.md) → Loader → Chunker (500 chars) → Embeddings (Google GenAI)
 
 ### Embedding: Google Generative AI
 - High-quality embeddings at no cost (free tier).
-- Works well with LangChain's `GoogleGenerativeAIEmbeddings`.
+- Uses `gemini-embedding-001` via LangChain's `GoogleGenerativeAIEmbeddings`.
 
-### LLM: Groq LLaMA 3.1 8B Instant
+### LLM: Groq LLaMA 3.3 70B Versatile (Primary) + Google Gemini 2.5 Flash (Fallback)
 - Fast inference via Groq's hardware.
 - Temperature 0.1 for factual, deterministic answers.
-- 8B parameter model is sufficient for structured policy Q&A.
+- Automatic fallback to Google Gemini if Groq fails.
+- Raw context returned as last resort if both models fail.
 
 ---
 
@@ -189,18 +220,15 @@ Respond in this format:
 
 ## Evaluation
 
-### Test Set (8 Questions)
+### Test Set (5 Questions)
 
 | # | Question | Category |
 |---|----------|----------|
-| 1 | How can I cancel my monthly subscription? | Answerable |
-| 2 | How long does it take to process a refund? | Answerable |
-| 3 | What happens if I cancel a workshop within 24 hours? | Answerable |
-| 4 | How are project deliverables shared with clients? | Answerable |
-| 5 | What is the refund policy for annual subs and what discounts are available? | Partially Answerable |
-| 6 | Can I get a refund after project starts, and who is my account manager? | Partially Answerable |
-| 7 | What are the pricing tiers for the AI platform? | Unanswerable |
-| 8 | Does Neura Dynamics offer a free trial period? | Unanswerable |
+| 1 | How long does it take to process a refund? | Answerable |
+| 2 | What is the refund policy for annual subs and what discounts are available? | Partially Answerable |
+| 3 | Can I get a refund after project starts, and who is my account manager? | Partially Answerable |
+| 4 | Does Neura Dynamics offer a free trial period? | Unanswerable |
+| 5 | What programming languages and tech stack does Neura Dynamics use internally? | Unanswerable |
 
 ### Scoring Rubric
 
@@ -235,10 +263,16 @@ Results are saved as JSON in the `evaluation_results/` folder.
 
 | Feature | Location |
 |---------|----------|
-| Prompt templating with LangChain `PromptTemplate` | `rag/prompts.py` |
+| LangGraph agentic workflow with intent routing | `agent/workflow.py`, `agent/nodes.py` |
+| Intent classification (GREETING / INQUIRY / OUT_OF_SCOPE) | `agent/nodes.py` |
+| Prompt templating with v1, v2, and greeting prompts | `rag/prompts.py` |
 | Simple keyword-overlap reranking | `rag/retriever.py` |
-| Comparison between prompt v1 and v2 | `evaluation/evaluate.py --compare` |
-| Basic query tracing / logging | `rag/logger.py` → `logs/rag_trace.log` |
+| Dual LLM with automatic fallback (Groq → Google) | `utils/llms.py`, `rag/generate.py` |
+| Conversation memory (last N turns) | `main.py` |
+| DeepEval evaluation with OpenRouter LLM judge | `evaluation/deepeval_eval.py` |
+| Prompt v1 vs v2 comparison | `evaluation/deepeval_eval.py --compare` |
+| Confident AI dashboard integration | via `CONFIDENT_API_KEY` |
+| Basic query tracing / logging | `utils/logger.py` → `logs/rag_trace.log` |
 
 ---
 
@@ -247,17 +281,15 @@ Results are saved as JSON in the `evaluation_results/` folder.
 ### Trade-offs Made
 - **Keyword reranking vs. cross-encoder:** Used simple keyword overlap instead of a neural reranker. Cheaper and faster, but less accurate for semantic similarity.
 - **Fixed top-k=3:** Works well for 3 small docs but would need tuning for larger corpora.
-- **Rule-based evaluation vs. LLM-as-judge:** Manual keyword + heuristic scoring is transparent but doesn't capture semantic correctness fully.
+- **OpenRouter as eval judge:** Convenient single API for accessing many models, but adds a network dependency and rate limits compared to local evaluation.
 
 ### Improvements with More Time
 1. **Cross-encoder reranking** (e.g., `ms-marco-MiniLM`) for better retrieval precision.
-2. **LLM-as-judge evaluation** — use a second LLM to score answer quality.
-3. **Hybrid search** — combine semantic + BM25 keyword search for better recall.
-4. **Output schema validation** — enforce JSON output with Pydantic models.
-5. **Streaming responses** for better UX in the CLI.
-6. **Metadata filtering** — allow users to specify which policy to search.
-7. **Conversation memory** — maintain context across multi-turn Q&A.
-8. **More evaluation metrics** — ROUGE, BERTScore, faithfulness scores.
+2. **Hybrid search** — combine semantic + BM25 keyword search for better recall.
+3. **Output schema validation** — enforce JSON output with Pydantic models.
+4. **Streaming responses** for better UX in the CLI.
+5. **Metadata filtering** — allow users to specify which policy to search.
+6. **Larger evaluation set** — more questions per category for statistically robust scores.
 
 ---
 

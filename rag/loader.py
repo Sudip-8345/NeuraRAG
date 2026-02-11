@@ -5,7 +5,6 @@ import config
 
 
 def load_documents():
-    """Load all .md files and return as LangChain Documents."""
     loader = DirectoryLoader(
         config.DATA_DIR,
         glob="**/*.md",
