@@ -23,14 +23,12 @@ cd NeuraRAG
 # Create virtual environment
 python -m venv venv
 venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Configure API keys
 copy .env.example .env       # Windows
-# cp .env.example .env       # macOS/Linux
 # Then edit .env and add your API keys:
 #   GROQ_API_KEY, GOOGLE_API_KEY, OPENROUTER_API_KEY, CONFIDENT_API_KEY
 ```
@@ -133,9 +131,9 @@ The agent uses a **conditional routing** pattern:
 ### RAG Pipeline Flow
 
 ```
-Documents (.md) → Loader → Chunker (500 chars) → Embeddings (Google GenAI)
-    → ChromaDB (vector store) → Semantic Retrieval (top-3)
-    → Keyword Reranking → Prompt Template → Groq LLaMA 3.3 70B → Answer
+Documents (.md) -> Loader -> Chunker (500 chars) -> Embeddings (Google GenAI)
+    -> ChromaDB (vector store) -> Semantic Retrieval (top-3)
+    -> Keyword Reranking -> Prompt Template -> Groq LLaMA 3.3 70B -> Answer
 ```
 
 ---
@@ -180,6 +178,9 @@ Answer:
 ```
 
 **Issues observed:** No citations, occasional hallucination, unstructured output, weak handling of unanswerable questions.
+---
+<img width="848" height="229" alt="Screenshot 2026-02-11 212034" src="https://github.com/user-attachments/assets/181b63bb-c87b-421a-a2bb-117f5b5a2845" />
+---
 
 ### Prompt V2 — Improved Version
 
@@ -205,7 +206,10 @@ Respond in this format:
 **Sources:** <list the source document(s) used>
 **Confidence:** <High / Medium / Low>
 ```
+---
+<img width="846" height="323" alt="Screenshot 2026-02-11 211854" src="https://github.com/user-attachments/assets/2f1c1fd4-b53e-4cf1-bfa6-1f3e7559397c" />
 
+---
 **What changed and why:**
 
 | Change | Why |
@@ -249,13 +253,21 @@ Respond in this format:
 
 ```bash
 # Single prompt evaluation
-python -m evaluation.evaluate --prompt v2
+python evaluation/deepeval_eval.py --prompt v2
 
 # Compare both prompts side by side
-python -m evaluation.evaluate --compare
+python evaluation/deepeval_eval.py --compare
 ```
 
 Results are saved as JSON in the `evaluation_results/` folder.
+
+### v1 Results
+---
+<img width="1161" height="616" alt="Screenshot 2026-02-12 004912" src="https://github.com/user-attachments/assets/791c9d16-23ae-4be1-b0a1-38800d7a4195" />
+
+### v2 Results
+---
+<img width="1362" height="630" alt="Screenshot 2026-02-12 010021" src="https://github.com/user-attachments/assets/7ae9d84d-0c8a-4cce-8340-aa642d80f790" />
 
 ---
 
