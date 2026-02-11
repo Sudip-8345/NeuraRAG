@@ -263,11 +263,11 @@ Results are saved as JSON in the `evaluation_results/` folder.
 
 ### v1 Results
 ---
-<img width="1161" height="616" alt="Screenshot 2026-02-12 004912" src="https://github.com/user-attachments/assets/791c9d16-23ae-4be1-b0a1-38800d7a4195" />
+<img width="1161" height="616" alt="Screenshot 2026-02-12 004912" src="https://github.com/Sudip-8345/NeuraRAG/blob/e6129c164f2914af11d2387cfc0f7a91e64c6852/evaluation_results/v1/Screenshot%202026-02-12%20004912.png" />
 
 ### v2 Results
 ---
-<img width="1362" height="630" alt="Screenshot 2026-02-12 010021" src="https://github.com/user-attachments/assets/7ae9d84d-0c8a-4cce-8340-aa642d80f790" />
+<img width="1362" height="630" alt="Screenshot 2026-02-12 010021" src="https://github.com/Sudip-8345/NeuraRAG/blob/e6129c164f2914af11d2387cfc0f7a91e64c6852/evaluation_results/v2/Screenshot%202026-02-12%20010021.png" />
 
 ---
 
