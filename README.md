@@ -204,10 +204,9 @@ QUESTION: {question}
 Respond in this format:
 **Answer:** <your answer here, with [Source: filename] citations>
 **Sources:** <list the source document(s) used>
-**Confidence:** <High / Medium / Low>
 ```
 ---
-<img width="846" height="323" alt="Screenshot 2026-02-11 211854" src="https://github.com/user-attachments/assets/2f1c1fd4-b53e-4cf1-bfa6-1f3e7559397c" />
+<img width="846" height="323" alt="Screenshot 2026-02-11 211854" src="https://github.com/Sudip-8345/NeuraRAG/blob/8513a7aa9f0d2c4fdea1aa14d63afd763394e2d8/assests/Screenshot%202026-02-11%20211854.png" />
 
 ---
 **What changed and why:**
@@ -233,6 +232,10 @@ Respond in this format:
 | 3 | Can I get a refund after project starts, and who is my account manager? | Partially Answerable |
 | 4 | Does Neura Dynamics offer a free trial period? | Unanswerable |
 | 5 | What programming languages and tech stack does Neura Dynamics use internally? | Unanswerable |
+
+## Results
+---
+<img width="1161" height="616" alt="Screenshot 2026-02-12 004912" src="https://github.com/Sudip-8345/NeuraRAG/blob/8513a7aa9f0d2c4fdea1aa14d63afd763394e2d8/evaluation_results/v2/Screenshot%202026-02-12%20005934.png" />
 
 ### Scoring Rubric
 
