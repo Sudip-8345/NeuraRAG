@@ -213,4 +213,8 @@ chroma_db/
 .env
 
 # Evaluation results
+evaluation_results/
 evaluation_results.json
+
+# Logs
+logs/

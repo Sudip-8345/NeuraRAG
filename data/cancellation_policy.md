@@ -1,94 +1,65 @@
-# Cancellation Policy
+# Cancellation Policy – Neura Dynamics
 
-## Order Cancellation
+## Scope
+Applies to:
+- AI consulting and implementation projects  
+- Managed AI/ML and automation services  
+- Subscriptions to Neura Dynamics platforms, AI agents, and APIs  
+- Training, workshops, and related services  
 
-### Before Shipment
-- Orders can be cancelled free of charge before shipment
-- To cancel, contact customer service as soon as possible
-- Processing typically stops within 2-4 hours of cancellation request
-- Full refund will be issued if order hasn't shipped
+---
 
-### After Shipment
-- Once an order has shipped, it cannot be cancelled
-- You may refuse delivery and return the package for a refund
-- Refusing delivery follows our standard refund policy
-- Return shipping fees may apply
+## Projects and Services
 
-## Timeframes for Cancellation
+### Before Project Start
+- You may cancel before project kick-off (first working session or access provisioning).
+- Advance payments are refundable minus any non-recoverable third-party costs.
+- Contact your account manager or email **support@neuradynamics.ai** with your project ID.
 
-### Standard Orders
-- Can be cancelled within 24 hours of placing the order
-- No cancellation fee applies
-- Full refund processed within 3-5 business days
+### After Project Start
+- Treated as early termination under your SoW/MSA.
+- You pay for all work completed and committed third-party costs up to the cancellation date.
+- Any prepaid, unused phases may be partially refunded or credited, per contract.
 
-### Custom Orders
-- Custom or made-to-order items have a 2-hour cancellation window
-- After 2 hours, custom orders cannot be cancelled
-- A 25% restocking fee may apply to cancelled custom orders within the window
+---
 
-### Subscription Services
-- Monthly subscriptions can be cancelled at any time
-- Cancellation takes effect at the end of current billing period
-- No refunds for partial months already billed
-- Annual subscriptions require 30 days notice for cancellation
+## Subscriptions and Platform Access
 
-## How to Cancel an Order
+### Monthly Plans
+- Can be cancelled anytime via your account or support.
+- Effective at end of current billing cycle.
+- No refunds for unused days in the active period.
 
-### Online Cancellation
-1. Log into your account
-2. Go to "Order History"
-3. Select the order you wish to cancel
-4. Click "Cancel Order" button
-5. Confirm cancellation
+### Annual Plans
+- Require **30 days notice** before renewal to avoid auto-renewal.
+- Once the term starts, fees are generally non-refundable except where contract or law provides otherwise.
+- Auto-renewals: cancel at least **48 hours** before renewal; contact support within **24 hours** for unintended renewals.
 
-### Customer Service Cancellation
-- Email: support@company.com
-- Phone: 1-800-SUPPORT (1-800-787-7678)
-- Live Chat: Available on our website 24/7
+---
 
-## Cancellation Fees
+## Training, Workshops, and Events
 
-### No Fee Situations
-- Standard orders cancelled before processing
-- Subscription services cancelled with proper notice
-- Items out of stock at time of order
+- Cancel **7+ days** before the session: full refund or credit.
+- Cancel within **7 days**: up to 50% fee may be retained.
+- Cancel within **24 hours** or no-show: non-refundable.
 
-### Fee-Based Cancellations
-- Custom orders: 25% restocking fee if applicable
-- Special order items: May incur supplier cancellation fees
-- International orders: Currency conversion fees may apply
+---
 
-## Special Circumstances
+## Payments, Fees, and Suspension
 
-### Auto-Renewal Cancellations
-- Subscriptions auto-renew unless cancelled
-- Cancel at least 48 hours before renewal date
-- No refunds for auto-renewals already processed
-- Grace period of 24 hours for accidental renewals
+- No cancellation fee if no work has started and no third-party costs were incurred.
+- Early termination fees or non-refundable third-party expenses may apply, as per your contract.
+- Failed payments may lead to suspension after a grace period (typically **7 days**) if not resolved.
 
-### Group or Bulk Orders
-- Bulk orders (10+ items) require 48 hours notice for cancellation
-- Partial cancellations may be allowed for bulk orders
-- Contact our corporate sales team for assistance
+---
 
-### Event Tickets or Reservations
-- Must be cancelled 72 hours before event date
-- No refunds for cancellations within 72 hours of event
-- May be eligible for credit toward future events
+## How to Cancel
 
-## Failed Payment Cancellations
-- Orders with failed payments are automatically cancelled after 48 hours
-- You will receive email notification before automatic cancellation
-- Can re-place order after resolving payment issue
+- Use your Neura Dynamics account portal where available, or  
+- Email: **support@neuradynamics.ai** with:
+  - Company name  
+  - Contact person  
+  - Subscription or project ID  
+  - Requested effective date  
 
-## Post-Cancellation Process
-- Confirmation email sent immediately upon cancellation
-- Refunds processed according to refund policy timeframes
-- Any partial shipments will be recalled if possible
-- Account credits may be issued instead of refund upon request
-
-## Contact Information
-For cancellation assistance:
-- Email: support@company.com
-- Phone: 1-800-SUPPORT (1-800-787-7678)
-- Hours: 24/7 customer support available
+You will receive a written confirmation, final billing (if any), and information on data access or export options.

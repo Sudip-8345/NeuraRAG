@@ -1,344 +1,266 @@
-# NeuraRAG: Policy Q&A Assistant
+# NeuraRAG — Policy Q&A Assistant
 
-A modular Retrieval-Augmented Generation (RAG) system for answering questions about company policies using Groq's LLaMA 3.1 and ChromaDB.
+A Retrieval-Augmented Generation (RAG) system that answers questions about company policy documents (Refund, Cancellation, Shipping/Delivery) using semantic retrieval and Groq-hosted LLaMA.
 
-## 🎯 Overview
+---
 
-This system demonstrates effective prompt engineering, retrieval optimization, and hallucination prevention in a production-ready RAG pipeline. It answers questions about refund, cancellation, and shipping policies while explicitly avoiding hallucinations.
+## Quick Start
 
-## 🏗️ Architecture
+### 1. Prerequisites
+- Python 3.10+
+- [Groq API Key](https://console.groq.com/keys) (free tier available)
+- [Google AI API Key](https://aistudio.google.com/apikey) (for embeddings)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      RAG System                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
-│  │   Document   │───▶│   Vector     │───▶│     LLM      │ │
-│  │  Processing  │    │  Retrieval   │    │  Generation  │ │
-│  └──────────────┘    └──────────────┘    └──────────────┘ │
-│         │                    │                    │        │
-│    Chunking            Embeddings           Prompting      │
-│    Cleaning           ChromaDB              Groq API       │
-│                    Top-k Search          LLaMA 3.1 70B     │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+### 2. Setup
 
-### Components
-
-1. **Data Preparation** (`src/data_preparation.py`)
-   - Document loading (Markdown, TXT, PDF)
-   - Text cleaning and normalization
-   - Intelligent chunking with overlap
-
-2. **Retrieval** (`src/retrieval.py`)
-   - Sentence-Transformers embeddings (`all-MiniLM-L6-v2`)
-   - ChromaDB vector storage with cosine similarity
-   - Top-k semantic search
-
-3. **Generation** (`src/generation.py`)
-   - Groq LLaMA 3.1 70B integration
-   - Prompt template management
-   - Context formatting
-
-4. **Evaluation** (`src/evaluation.py`)
-   - Structured evaluation dataset
-   - Accuracy, hallucination, and clarity metrics
-   - Automated scoring system
-
-## 🚀 Setup
-
-### Prerequisites
-
-- Python 3.8+
-- Groq API key ([Get one here](https://console.groq.com/keys))
-
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/Sudip-8345/NeuraRAG.git
+# Clone the repo
+git clone https://github.com/your-username/NeuraRAG.git
 cd NeuraRAG
-```
 
-2. Install dependencies:
-```bash
+# Create virtual environment
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS/Linux
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure API keys
+copy .env.example .env       # Windows
+# cp .env.example .env       # macOS/Linux
+# Then edit .env and add your GROQ_API_KEY and GOOGLE_API_KEY
 ```
 
-3. Set up environment variables:
+### 3. Build the Vector Store
+
 ```bash
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
+python main.py --build
 ```
 
-### Quick Start
+### 4. Ask Questions
 
-1. **Index the policy documents:**
 ```bash
-python main.py index
+# Interactive Q&A (default: prompt v2 with reranking)
+python main.py
+
+# Use prompt v1 for comparison
+python main.py --prompt v1
+
+# Disable reranking
+python main.py --no-rerank
 ```
 
-2. **Ask a question:**
+### 5. Run Evaluation
+
 ```bash
-python main.py ask "Can I return a product after 30 days?"
+# Evaluate with prompt v2 (default)
+python -m evaluation.evaluate
+
+# Evaluate with prompt v1
+python -m evaluation.evaluate --prompt v1
+
+# Compare v1 vs v2
+python -m evaluation.evaluate --compare
 ```
 
-3. **Interactive mode:**
-```bash
-python main.py interactive
-```
+---
 
-4. **Run evaluation:**
-```bash
-python main.py evaluate --save evaluation_results.json
-```
-
-5. **View prompts:**
-```bash
-python main.py prompts
-```
-
-## 📊 Design Decisions
-
-### Chunk Size: 512 characters
-
-**Why this size?**
-- **Semantic Coherence**: Captures 2-3 paragraphs, maintaining logical context
-- **Embedding Model**: Fits well with sentence-transformers (typical max: 512 tokens)
-- **Balance**: Not too small (lacks context) nor too large (dilutes relevance)
-- **Performance**: Optimal for retrieval speed and accuracy
-
-**Alternatives Considered:**
-- 256 chars: Too granular, loses context
-- 1024 chars: Better context but slower retrieval and potential relevance dilution
-
-### Top-k: 3 chunks
-
-**Why 3?**
-- **Context Window**: Fits comfortably in LLM context without overwhelming
-- **Diversity**: Provides multiple perspectives on the query
-- **Precision vs Recall**: Balances finding the answer with avoiding noise
-- **Cost**: Reduces API costs while maintaining quality
-
-### Embedding Model: all-MiniLM-L6-v2
-
-**Why this model?**
-- **Speed**: Fast inference for real-time retrieval
-- **Quality**: Strong semantic similarity performance
-- **Size**: Lightweight (384 dimensions vs 768+ in larger models)
-- **Use Case**: Optimized for semantic search and Q&A
-
-## 🎨 Prompt Engineering
-
-### Initial Prompt (v1)
+## Architecture Overview
 
 ```
-You are a helpful customer service assistant. Answer the user's question 
-based on the provided context from company policy documents.
+NeuraRAG/
+├── config.py                # Centralized settings (API keys, chunk size, model)
+├── main.py                  # CLI entry point (build index / interactive Q&A)
+├── .env                     # API keys (not committed)
+├── .env.example             # Template for .env
+├── requirements.txt         # Python dependencies
+│
+├── data/                    # Source policy documents (Markdown)
+│   ├── cancellation_policy.md
+│   ├── refund_policy.md
+│   └── shipping_policy.md
+│
+├── rag/                     # RAG pipeline modules
+│   ├── loader.py            # Load .md files using LangChain DirectoryLoader
+│   ├── chunker.py           # Split docs with RecursiveCharacterTextSplitter
+│   ├── embeddings.py        # Google Generative AI embeddings
+│   ├── vectorstore.py       # ChromaDB build & load
+│   ├── retriever.py         # Semantic search + keyword reranking
+│   ├── prompts.py           # Prompt templates v1 & v2 with iteration notes
+│   ├── chain.py             # Full RAG chain: retrieve → rerank → prompt → LLM
+│   └── logger.py            # Basic query tracing to logs/rag_trace.log
+│
+├── evaluation/              # Evaluation pipeline
+│   ├── questions.py         # 8 test questions (answerable / partial / unanswerable)
+│   └── evaluate.py          # Automated scoring with keyword + hallucination checks
+│
+├── evaluation_results/      # JSON outputs from evaluation runs
+├── chroma_db/               # Persisted vector store (auto-generated)
+└── logs/                    # Query trace logs (auto-generated)
+```
+
+### Pipeline Flow
+
+```
+Documents (.md) → Loader → Chunker (500 chars) → Embeddings (Google GenAI)
+    → ChromaDB (vector store) → Semantic Retrieval (top-3)
+    → Keyword Reranking → Prompt Template → Groq LLaMA 3.1 → Answer
+```
+
+---
+
+## Design Decisions
+
+### Chunking Strategy (500 chars, 50 overlap)
+- Policy docs are short (~60 lines each) with clear sections (headings, bullets).
+- 500 chars keeps each chunk ≈ 1 policy section, preserving semantic coherence.
+- 50 char overlap prevents cutting mid-sentence at chunk boundaries.
+- Custom separators (`## `, `### `, `---`, `\n\n`) respect Markdown structure.
+
+### Retrieval: Top-3 + Keyword Reranking
+- Top-3 balances relevance vs. noise for these short docs.
+- Keyword-overlap reranking re-scores chunks by query-word frequency — a simple but effective way to boost chunks that directly mention the user's topic.
+
+### Embedding: Google Generative AI
+- High-quality embeddings at no cost (free tier).
+- Works well with LangChain's `GoogleGenerativeAIEmbeddings`.
+
+### LLM: Groq LLaMA 3.1 8B Instant
+- Fast inference via Groq's hardware.
+- Temperature 0.1 for factual, deterministic answers.
+- 8B parameter model is sufficient for structured policy Q&A.
+
+---
+
+## Prompts
+
+### Prompt V1 — Initial Version
+
+```
+You are a helpful assistant for Neura Dynamics company policies.
+
+Use the following context to answer the question. If the answer is not
+in the context, say "I don't have enough information to answer this."
 
 Context: {context}
 Question: {question}
 Answer:
 ```
 
-**Problems:**
-- No hallucination prevention
-- No guidance for missing information
-- Generic formatting
-- Doesn't emphasize grounding
+**Issues observed:** No citations, occasional hallucination, unstructured output, weak handling of unanswerable questions.
 
-### Improved Prompt (v2)
+### Prompt V2 — Improved Version
 
 ```
-You are a helpful and accurate customer service assistant for our company. 
-Your role is to answer questions based ONLY on the information provided 
-in the context below.
+You are a precise policy assistant for Neura Dynamics. Your job is to
+answer questions ONLY using the provided context from company policy documents.
 
-**Instructions:**
-1. Answer the question using ONLY the information from the provided context
-2. If the context contains the answer, provide a clear and concise response
-3. If the context does NOT contain enough information to answer the question, 
-   respond with: "I don't have enough information in our policy documents 
-   to answer this question. Please contact customer service at 
-   support@company.com for assistance."
-4. Do NOT make up information or use external knowledge
-5. Structure your answer with clear formatting when appropriate 
-   (bullet points, numbered lists)
-6. Cite the relevant policy when possible (e.g., "According to our 
-   Refund Policy...")
+RULES:
+1. ONLY use information explicitly stated in the context below.
+2. Do NOT add any information, assumptions, or details beyond the context.
+3. If the context does not contain the answer, respond with:
+   "This information is not available in the provided policy documents."
+4. If only part of the question can be answered, answer what you can and
+   clearly state which part cannot be answered from the available context.
+5. Cite the source document for each piece of information using [Source: filename].
+6. Use bullet points for multi-part answers.
 
-**Context from Policy Documents:**
-{context}
+CONTEXT: {context}
+QUESTION: {question}
 
-**Question:** {question}
-
-**Answer:**
+Respond in this format:
+**Answer:** <your answer here, with [Source: filename] citations>
+**Sources:** <list the source document(s) used>
+**Confidence:** <High / Medium / Low>
 ```
 
-### Key Improvements
+**What changed and why:**
 
-| Aspect | Before | After | Impact |
-|--------|--------|-------|--------|
-| **Grounding** | Implicit | Explicit "ONLY from context" | -60% hallucinations |
-| **Uncertainty** | Silent failure | Template response | +80% trust |
-| **Structure** | Plain text | Markdown formatting | +50% readability |
-| **Citations** | None | Source references | +40% verifiability |
-| **Safety** | Weak boundaries | Clear limitations | +90% accuracy |
-
-### Why These Changes Matter
-
-1. **Explicit Grounding**: The phrase "based ONLY on" is psychologically stronger than "based on"
-2. **Fallback Template**: Provides a consistent, helpful response when information is missing
-3. **Structured Instructions**: Numbered list format is clearer for LLMs to follow
-4. **Citation Guidance**: Encourages traceability and user verification
-5. **Negative Instructions**: "Do NOT make up" is surprisingly effective for hallucination prevention
-
-## 📈 Evaluation Results
-
-### Evaluation Dataset (8 questions)
-
-| Type | Count | Examples |
-|------|-------|----------|
-| **Answerable** | 4 | "Can I return a product after 30 days?" |
-| **Partially Answerable** | 2 | "Do you ship to Australia?" |
-| **Unanswerable** | 2 | "What is your warranty policy?" |
-
-### Scoring Rubric
-
-- ✅ **Pass**: Correct and appropriate response
-- ⚠️ **Warning**: Partially correct or minor issues
-- ❌ **Fail**: Incorrect, hallucinated, or inappropriate response
-
-### Sample Results
-
-| Question | Expected Type | Accuracy | Hallucination Prevention | Clarity |
-|----------|--------------|----------|-------------------------|---------|
-| "Can I return after 30 days?" | Answerable | ✅ | ✅ | ✅ |
-| "Overnight shipping cost?" | Answerable | ✅ | ✅ | ✅ |
-| "Ship to Australia?" | Partial | ✅ | ✅ | ⚠️ |
-| "Warranty policy?" | Unanswerable | ✅ | ✅ | ✅ |
-| "Cryptocurrency payment?" | Unanswerable | ✅ | ✅ | ✅ |
-
-**Overall Performance:**
-- **Accuracy**: 7/8 Pass (87.5%)
-- **Hallucination Prevention**: 8/8 Pass (100%)
-- **Clarity**: 7/8 Pass (87.5%)
-- **Overall**: Strong performance with reliable hallucination avoidance
-
-### Key Findings
-
-1. **Hallucination Prevention**: 100% success rate on unanswerable questions
-2. **Partial Questions**: Appropriately acknowledges limitations
-3. **Clarity**: Occasionally verbose but never unclear
-4. **Grounding**: Excellent adherence to source material
-
-## 🔧 Key Trade-offs & Future Improvements
-
-### Current Limitations
-
-1. **Chunk Size**: Fixed 512 chars may split important context
-   - **Improvement**: Implement semantic chunking at sentence/paragraph boundaries
-
-2. **Retrieval**: Simple top-k without reranking
-   - **Improvement**: Add cross-encoder reranking for better precision
-
-3. **Single Retrieval Pass**: No iterative refinement
-   - **Improvement**: Implement query expansion or multi-hop retrieval
-
-4. **No Query Classification**: All queries treated equally
-   - **Improvement**: Pre-classify queries to route to appropriate strategies
-
-5. **Fixed Top-k**: Doesn't adapt to query complexity
-   - **Improvement**: Dynamic top-k based on query analysis
-
-### With More Time
-
-#### Short Term (1-2 days)
-- [ ] Add reranking step with cross-encoder
-- [ ] Implement query preprocessing (spell check, expansion)
-- [ ] Add response validation schema (JSON output)
-- [ ] Comparison dashboard for prompt versions
-
-#### Medium Term (1 week)
-- [ ] Implement LangChain/LangGraph for better orchestration
-- [ ] Add conversation history for multi-turn Q&A
-- [ ] Implement hybrid search (semantic + keyword)
-- [ ] Add logging/tracing with LangSmith or Weights & Biases
-
-#### Long Term (1 month)
-- [ ] Fine-tune embedding model on domain data
-- [ ] Implement RLHF feedback loop for prompt improvement
-- [ ] Add multi-modal support (PDFs with images/tables)
-- [ ] Build evaluation harness with LLM-as-judge
-
-## 📁 Project Structure
-
-```
-NeuraRAG/
-├── data/                       # Policy documents
-│   ├── refund_policy.md
-│   ├── cancellation_policy.md
-│   └── shipping_policy.md
-├── src/                        # Source code
-│   ├── data_preparation.py    # Document loading & chunking
-│   ├── retrieval.py           # Vector store & search
-│   ├── generation.py          # LLM integration & prompts
-│   ├── evaluation.py          # Evaluation framework
-│   └── rag_system.py          # Main RAG orchestration
-├── main.py                    # CLI interface
-├── requirements.txt           # Dependencies
-├── .env.example              # Environment template
-├── .gitignore                # Git ignore rules
-└── README.md                 # This file
-```
-
-## 🧪 Testing
-
-### Manual Testing
-```bash
-# Test individual components
-python main.py ask "What is the refund policy?" --verbose
-
-# Test prompt versions
-python main.py prompts
-```
-
-### Automated Evaluation
-```bash
-# Run full evaluation suite
-python main.py evaluate --save results.json
-
-# Analyze results
-cat results.json | jq '.[] | select(.accuracy != "✅")'
-```
-
-## 🎓 Learning Outcomes
-
-This project demonstrates:
-
-1. **Prompt Engineering**: Iterative improvement with clear reasoning
-2. **RAG Architecture**: Modular, production-ready design
-3. **Evaluation**: Systematic assessment of model quality
-4. **Trade-offs**: Conscious decisions about complexity vs. quality
-5. **Hallucination Prevention**: Explicit grounding and fallback strategies
-
-## 📚 References
-
-- [Groq API Documentation](https://console.groq.com/docs)
-- [ChromaDB Documentation](https://docs.trychroma.com/)
-- [Sentence-Transformers](https://www.sbert.net/)
-- [RAG Best Practices](https://arxiv.org/abs/2312.10997)
-
-## 📝 License
-
-MIT License - See LICENSE file for details
-
-## 👤 Author
-
-Built as a demonstration of RAG system design and prompt engineering skills.
+| Change | Why |
+|--------|-----|
+| Added numbered RULES section | Explicit constraints reduce hallucination more effectively than vague instructions |
+| Required `[Source: filename]` citations | Enables users to verify answers against source documents |
+| Structured output format (Answer/Sources/Confidence) | Consistent, parseable output; confidence helps users gauge reliability |
+| Separate handling for unanswerable + partially answerable | V1 only handled "don't know"; V2 distinguishes partial answers |
+| Bullet points instruction | Improves readability for multi-part answers |
 
 ---
 
-**Note**: This is a demonstration project focusing on prompt quality, retrieval accuracy, and system design. It's not optimized for production deployment but showcases best practices in RAG development.
+## Evaluation
+
+### Test Set (8 Questions)
+
+| # | Question | Category |
+|---|----------|----------|
+| 1 | How can I cancel my monthly subscription? | Answerable |
+| 2 | How long does it take to process a refund? | Answerable |
+| 3 | What happens if I cancel a workshop within 24 hours? | Answerable |
+| 4 | How are project deliverables shared with clients? | Answerable |
+| 5 | What is the refund policy for annual subs and what discounts are available? | Partially Answerable |
+| 6 | Can I get a refund after project starts, and who is my account manager? | Partially Answerable |
+| 7 | What are the pricing tiers for the AI platform? | Unanswerable |
+| 8 | Does Neura Dynamics offer a free trial period? | Unanswerable |
+
+### Scoring Rubric
+
+| Symbol | Meaning |
+|--------|---------|
+| ✅ PASS | Accurate, grounded, no hallucination |
+| ⚠️ PARTIAL | Partially correct or missing nuance |
+| ❌ FAIL | Wrong, hallucinated, or missed entirely |
+
+### Evaluation Criteria
+
+- **Accuracy:** Does the answer match expected info from the docs?
+- **Hallucination Avoidance:** Does the answer invent info not in context?
+- **Answer Clarity:** Is the answer well-structured and easy to understand?
+- **Grounding:** For unanswerable Qs, does it correctly decline?
+
+### Running the Evaluation
+
+```bash
+# Single prompt evaluation
+python -m evaluation.evaluate --prompt v2
+
+# Compare both prompts side by side
+python -m evaluation.evaluate --compare
+```
+
+Results are saved as JSON in the `evaluation_results/` folder.
+
+---
+
+## Bonus Features Implemented
+
+| Feature | Location |
+|---------|----------|
+| Prompt templating with LangChain `PromptTemplate` | `rag/prompts.py` |
+| Simple keyword-overlap reranking | `rag/retriever.py` |
+| Comparison between prompt v1 and v2 | `evaluation/evaluate.py --compare` |
+| Basic query tracing / logging | `rag/logger.py` → `logs/rag_trace.log` |
+
+---
+
+## Key Trade-offs & Improvements with More Time
+
+### Trade-offs Made
+- **Keyword reranking vs. cross-encoder:** Used simple keyword overlap instead of a neural reranker. Cheaper and faster, but less accurate for semantic similarity.
+- **Fixed top-k=3:** Works well for 3 small docs but would need tuning for larger corpora.
+- **Rule-based evaluation vs. LLM-as-judge:** Manual keyword + heuristic scoring is transparent but doesn't capture semantic correctness fully.
+
+### Improvements with More Time
+1. **Cross-encoder reranking** (e.g., `ms-marco-MiniLM`) for better retrieval precision.
+2. **LLM-as-judge evaluation** — use a second LLM to score answer quality.
+3. **Hybrid search** — combine semantic + BM25 keyword search for better recall.
+4. **Output schema validation** — enforce JSON output with Pydantic models.
+5. **Streaming responses** for better UX in the CLI.
+6. **Metadata filtering** — allow users to specify which policy to search.
+7. **Conversation memory** — maintain context across multi-turn Q&A.
+8. **More evaluation metrics** — ROUGE, BERTScore, faithfulness scores.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.

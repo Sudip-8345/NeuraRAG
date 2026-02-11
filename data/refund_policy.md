@@ -1,63 +1,46 @@
-# Refund Policy
+# Refund Policy – Neura Dynamics
 
 ## Overview
-This document outlines our company's refund policy for all products and services purchased through our platform.
+This policy covers refunds for AI consulting, implementation projects, managed services, subscriptions, and training purchased from Neura Dynamics.
+
+---
 
 ## Eligibility for Refunds
 
-### Products
-- Physical products can be returned within 30 days of delivery
-- Products must be in original condition with all tags and packaging intact
-- Electronics must be unopened and sealed in original packaging
-- Custom or personalized items are not eligible for refunds
+### Projects and Services
+- For fixed-scope or T&M projects, refunds are not given for completed work.
+- If service quality materially deviates from the agreed SoW/MSA, we may offer a partial or full refund or service credit after review.
+- Prepaid amounts for work not yet performed may be refunded or credited, subject to contract terms and any committed third-party costs.
 
-### Digital Products
-- Digital products (software, e-books, online courses) are non-refundable after download or access
-- Exceptions may be made for technical issues that cannot be resolved
-- Refund requests for digital products must be submitted within 48 hours of purchase
+### Subscriptions and Platform Access
+- Monthly and annual subscription fees are generally **non-refundable** once a billing period has started.
+- Exceptions may be considered in cases of sustained, verified technical issues where we are unable to restore service within a reasonable time; in such cases, we may issue pro‑rated credits rather than cash refunds.
 
-### Services
-- Service refunds are evaluated on a case-by-case basis
-- If service was not provided as described, full refund may be issued
-- Partial refunds may be offered for partially completed services
+### Training, Workshops, and Events
+- If a paid session is cancelled by Neura Dynamics with no reschedule option, you may choose a full refund or a credit toward future sessions.
+- If you cancel within the allowed cancellation window under our cancellation policy, applicable refunds or credits will follow that policy.
 
-## Refund Processing Time
-- Approved refunds are processed within 5-7 business days
-- The refund will be credited to the original payment method
-- Bank processing may take an additional 3-5 business days
+---
+
+## Refund Processing
+- Approved refunds are typically processed within **7–10 business days**.
+- Refunds are issued to the **original payment method** where possible; otherwise, a credit note or service credit may be provided.
+- Bank or card processor timelines may add a few additional business days.
+
+---
 
 ## Conditions and Restrictions
-- Proof of purchase (order number or receipt) is required
-- Items purchased on sale or clearance are final sale unless defective
-- Shipping costs are non-refundable unless the error was on our part
-- Refunds do not include any gift wrapping or special packaging fees
+- A valid contract, invoice, or payment reference is required to assess refund eligibility.
+- Non‑recoverable third-party costs (cloud reservations, licenses, paid datasets, etc.) are not refundable once incurred.
+- Where local law provides stronger customer rights, those rights will prevail over this policy.
+
+---
 
 ## How to Request a Refund
-1. Contact customer service at refunds@company.com
-2. Provide your order number and reason for return
-3. Wait for approval and return instructions
-4. Ship the item back using the provided label (if applicable)
-5. Refund will be processed upon receipt and inspection
-
-## Special Circumstances
-
-### Defective Products
-- Defective items can be returned at any time within warranty period
-- We cover all return shipping costs for defective items
-- You may choose between a refund or replacement
-
-### Wrong Item Received
-- If you receive the wrong item, contact us immediately
-- We will provide a prepaid return label
-- Full refund including shipping costs will be provided
-
-### Late Delivery
-- If delivery is significantly delayed beyond estimated date, you may request a refund
-- Delays due to weather or carrier issues may not qualify for refund
-- We will work with you to find a satisfactory resolution
-
-## Contact Information
-For refund inquiries:
-- Email: refunds@company.com
-- Phone: 1-800-REFUNDS (1-800-733-8637)
-- Hours: Monday-Friday, 9 AM - 6 PM EST
+1. Email **support@neuradynamics.ai** with:
+   - Company name  
+   - Contact person  
+   - Invoice or subscription/project ID  
+   - Clear description of the issue and refund request  
+2. Our team will review your request, which may include technical or delivery assessment.
+3. You will receive a written decision and, if approved, details of the refund or credit and expected processing timelines.
