@@ -302,6 +302,7 @@ Results are saved as JSON in the `evaluation_results/` folder.
 4. **Streaming responses** for better UX in the CLI.
 5. **Metadata filtering** — allow users to specify which policy to search.
 6. **Larger evaluation set** — more questions per category for statistically robust scores.
+7. **Deploy** - It is not the task. But I will deploy it further.
 
 ---
 
